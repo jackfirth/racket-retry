@@ -1,11 +1,17 @@
 #lang racket/base
 
-(provide retry-examples
+(provide (for-label (all-from-out racket/base
+                                  racket/contract
+                                  retry))
+         retry-examples
          retry-policy-tech
          retryer-tech
          source-code-link)
 
-(require scribble/example
+(require (for-label racket/base
+                    racket/contract
+                    retry)
+         scribble/example
          scribble/manual
          scribble/text)
 

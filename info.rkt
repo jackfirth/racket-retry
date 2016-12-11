@@ -3,4 +3,5 @@
 (define scribblings '(("main.scrbl" () (library) "retry")))
 (define compile-omit-paths '("private"))
 (define deps '("base"))
-(define build-deps '("scribble-lib"))
+(define build-deps '("racket-doc"
+                     "scribble-lib"))
