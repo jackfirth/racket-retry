@@ -3,7 +3,6 @@
 (require racket/contract/base)
 
 (provide
- with-retry
  (contract-out
   [always-retryer retryer?]
   [never-retryer retryer?]
