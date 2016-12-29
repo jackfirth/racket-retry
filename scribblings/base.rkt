@@ -2,14 +2,15 @@
 
 (provide (for-label (all-from-out racket/base
                                   racket/contract
+                                  racket/function
                                   retry))
          retry-examples
-         retry-policy-tech
          retryer-tech
          source-code-link)
 
 (require (for-label racket/base
                     racket/contract
+                    racket/function
                     retry)
          scribble/example
          scribble/manual
@@ -27,5 +28,4 @@
 (define ((tech-helper key) #:definition? [definition? #f] . pre-flow)
   (apply (if definition? deftech tech) #:key key pre-flow))
 
-(define retry-policy-tech (tech-helper "retry-policy"))
 (define retryer-tech (tech-helper "retryer"))
