@@ -71,15 +71,46 @@
        "Received exn-message: test exception and num-previous-retries: 12"))
     (check-mock-called-with? displayln-mock expected-displayln-arguments)))
 
+(define current-sleep (make-parameter sleep))
+(define (sleep* amount) ((current-sleep) amount))
+(define current-random (make-parameter random))
+(define (random* max) ((current-random) max))
+
 (define (sleep-retryer sleep-amount)
   (retryer #:handle (λ (_ num-previous-retries)
-                      (sleep (sleep-amount num-previous-retries)))))
+                      (sleep* (sleep-amount num-previous-retries)))))
+
+(module+ test
+  (test-case "sleep-retryer"
+    (define sleep-mock (mock #:behavior void))
+    (parameterize ([current-sleep sleep-mock])
+      (define test-sleep-amount (* _ 10))
+      (define test-retryer (sleep-retryer test-sleep-amount))
+      (check-true (retryer-should-retry? test-retryer 'foo 12))
+      (check-equal? (retryer-handle test-retryer 'foo 12) (void))
+      (check-mock-called-with? sleep-mock (arguments 120)))))
 
 (define (sleep-retryer/random max-sleep-amount)
-  (sleep-retryer (random .. max-sleep-amount)))
+  (sleep-retryer (random* .. max-sleep-amount)))
 
 (define (sleep-exponential-retryer milliseconds #:exponent-base [base 2])
   (sleep-retryer (/ _ 1000 .. * _ milliseconds .. expt base _)))
 
 (define (sleep-exponential-retryer/random milliseconds #:exponent-base [base 2])
-  (sleep-retryer (/ _ 1000 .. * _ milliseconds .. expt base _)))
+  (sleep-retryer/random (/ _ 1000 .. * _ milliseconds .. expt base _)))
+
+(module+ test
+  (test-case "sleep-exponential-retryer/random"
+    (define sleep-mock (mock #:behavior void))
+    (define random-mock (mock #:behavior sub1))
+    (parameterize ([current-sleep sleep-mock] [current-random random-mock])
+      (define test-retryer
+        (sleep-exponential-retryer/random 2000 #:exponent-base 3))
+      (check-true (retryer-should-retry? test-retryer 'foo 12))
+      (retryer-handle test-retryer 'foo 0)
+      (retryer-handle test-retryer 'foo 1)
+      (retryer-handle test-retryer 'foo 2)
+      (check-mock-calls sleep-mock
+                        (list (arguments 1)
+                              (arguments 5)
+                              (arguments 17))))))
