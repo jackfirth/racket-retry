@@ -26,11 +26,11 @@
                  #:handle [handle void])
   (make-retryer should-retry handle))
 
-(define (retryer-handle retryer raised num-previous-retries)
-  ((retryer-handle-proc retryer) raised num-previous-retries))
+(define (retryer-handle ret raised num-previous-retries)
+  ((retryer-handle-proc ret) raised num-previous-retries))
 
-(define (retryer-should-retry? retryer raised num-previous-retries)
-  ((retryer-should-retry-proc retryer) raised num-previous-retries))
+(define (retryer-should-retry? ret raised num-previous-retries)
+  ((retryer-should-retry-proc ret) raised num-previous-retries))
 
 (define (call/retry retryer proc)
   (let loop ([num-previous-retries 0])
