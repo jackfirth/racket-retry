@@ -7,7 +7,7 @@
  (contract-out
   [call/retry (-> retryer? (-> any) any)]
   [retryer (->* ()
-                (#:should-retry? (-> any/c boolean?)
+                (#:should-retry? (-> any/c exact-nonnegative-integer? boolean?)
                  #:handle (-> any/c exact-nonnegative-integer? void?))
                 retryer?)]
   [retryer? predicate/c]
