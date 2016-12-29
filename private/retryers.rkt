@@ -111,6 +111,4 @@
       (retryer-handle test-retryer 'foo 1)
       (retryer-handle test-retryer 'foo 2)
       (check-mock-calls sleep-mock
-                        (list (arguments 1)
-                              (arguments 5)
-                              (arguments 17))))))
+                        (list (arguments 1) (arguments 5) (arguments 17))))))
