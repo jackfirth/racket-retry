@@ -17,7 +17,6 @@
 
 (require compose-app/fancy-app
          racket/function
-         syntax/parse/define
          "base.rkt")
 
 
