@@ -1,6 +1,8 @@
 #lang racket/base
 
-(provide (for-label (all-from-out racket/base
+(provide (for-label (all-from-out gregor
+                                  gregor/period
+                                  racket/base
                                   racket/contract
                                   racket/function
                                   retry))
@@ -8,7 +10,9 @@
          retryer-tech
          source-code-link)
 
-(require (for-label racket/base
+(require (for-label gregor
+                    gregor/period
+                    (except-in racket/base date date?)
                     racket/contract
                     racket/function
                     retry)

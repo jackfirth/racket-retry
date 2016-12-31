@@ -80,43 +80,44 @@ For a gentler introduction and use cases, see @secref{retry-guide}.
  previous retries, and then passing the resulting string to @racket[displayln].}
 
 @defproc[(sleep-retryer
-          [sleep-amount-proc
-           (-> exact-nonnegative-integer? exact-nonnegative-integer?)])
+          [sleep-amount-proc (-> exact-nonnegative-integer? time-period?)])
          retryer?]{
  Returns a retryer that handles all raised values by @racket[sleep]-ing for an
- amount of milliseconds determined by calling @racket[sleep-amount-proc] with
+ amount of time determined by calling @racket[sleep-amount-proc] with
  the number of previous retries.}
 
 @defproc[(sleep-retryer/random
-          [max-sleep-amount-proc
-           (-> exact-nonnegative-integer? exact-nonnegative-integer?)])
+          [max-sleep-amount-proc (-> exact-nonnegative-integer? time-period?)])
           retryer?]{
  Like @racket[sleep-retryer], but instead of sleeping for an amount of
- milliseconds equal to what is returned by @racket[max-sleep-amount-proc] a
- @emph{random} amount of milliseconds @emph{up to} the returned amount is used.}
+ time equal to what is returned by @racket[max-sleep-amount-proc] a
+ @emph{random} amount of time @emph{up to} the returned amount is used. The unit
+ of the returned @racket[time-period?] determines how precise the randomness is.
+ Returning @racket[(seconds 3)] causes the retryer to sleep for either zero,
+ one, or two seconds, while returning @racket[(milliseconds 3000)] sleeps for up
+ to @racket[3000] milliseconds.}
 
 @defproc[(sleep-const-retryer [sleep-amount exact-nonnegative-integer?])
          retryer?]{
  Returns a retryer that handles all raised values by @racket[sleep]-ing for
- @racket[sleep-amount] milliseconds. Equivalent to
+ @racket[sleep-amount]. Equivalent to
  @racket[(sleep-retryer (const sleep-amount))].}
 
-@defproc[(sleep-const-retryer/random
-          [max-sleep-amount exact-nonnegative-integer?])
+@defproc[(sleep-const-retryer/random [max-sleep-amount time-period?])
          retryer?]{
  Like @racket[sleep-const-retryer] and @racket[sleep-retryer/random]. The
- returned retryer sleeps for at most @racket[max-sleep-amount] milliseconds.}
+ returned retryer sleeps for at most @racket[max-sleep-amount].}
 
-@defproc[(sleep-exponential-retryer [sleep-amount exact-nonnegative-integer?]
+@defproc[(sleep-exponential-retryer [sleep-amount time-period?]
                                     [#:exponent-base base (>/c 0) 2])
          retryer?]{
  Returns a retryer that handles all raised values by @racket[sleep]-ing for an
- amount of milliseconds equal to @racket[sleep-amount] multiplied by an
- exponential factor. The exponential factor is equal to @racket[base] raised to
- the power of the number of previous retries. With the default exponent base of
- two, the returned retryer sleeps for @racket[sleep-amount] on the first retry,
- twice that on the second, four times on the third, eight on the fourth, and so
- on. Supplying a different exponent base changes the speed of the exponential
+ amount of time equal to @racket[sleep-amount] multiplied by an exponential
+ factor. The exponential factor is equal to @racket[base] raised to the power of
+ the number of previous retries. With the default exponent base of two, the
+ returned retryer sleeps for @racket[sleep-amount] on the first retry, twice
+ that on the second, four times on the third, eight on the fourth, and so on.
+ Supplying a different exponent base changes the speed of the exponential
  growth.}
 
 @defproc[(sleep-exponential-retryer/random
@@ -124,7 +125,7 @@ For a gentler introduction and use cases, see @secref{retry-guide}.
           [#:exponent-base base (>/c 0) 2])
          retryer?]{
  Like @racket[sleep-exponential-retryer] and @racket[sleep-retryer/random]. The
- returned retryer sleeps for a random amount that is at most the amount the
+ returned retryer sleeps for a random amount of time that is at most what the
  equivalent @racket[sleep-exponential-retryer] would sleep for.}
 
 @section{Higher-Order Retryers}
