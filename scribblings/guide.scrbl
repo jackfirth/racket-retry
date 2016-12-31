@@ -12,4 +12,4 @@ API, see @secref{retry-reference}.
 @section{Intro to Retryers}
 @section{Predefined Retryers}
 @section{Building Complex Retryers}
-@section{Principles and Applications}
+@section{Retrying Principles and Applications}
