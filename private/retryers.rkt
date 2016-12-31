@@ -11,6 +11,8 @@
    (-> (-> string? exact-nonnegative-integer? void?) retryer?)]
   [sleep-retryer (-> sleep-amount-proc/c retryer?)]
   [sleep-retryer/random (-> sleep-amount-proc/c retryer?)]
+  [sleep-const-retryer (-> exact-nonnegative-integer? retryer?)]
+  [sleep-const-retryer/random (-> exact-nonnegative-integer? retryer?)]
   [sleep-exponential-retryer sleep-exponential-retryer/c]
   [sleep-exponential-retryer/random sleep-exponential-retryer/c]))
 
@@ -112,3 +114,6 @@
       (retryer-handle test-retryer 'foo 2)
       (check-mock-calls sleep-mock
                         (list (arguments 1) (arguments 5) (arguments 17))))))
+
+(define sleep-const-retryer (sleep-retryer .. const))
+(define sleep-const-retryer/random (sleep-retryer/random .. const))

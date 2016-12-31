@@ -80,12 +80,52 @@ For a gentler introduction and use cases, see @secref{retry-guide}.
  previous retries, and then passing the resulting string to @racket[displayln].}
 
 @defproc[(sleep-retryer
-          [sleep-amount
+          [sleep-amount-proc
            (-> exact-nonnegative-integer? exact-nonnegative-integer?)])
          retryer?]{
  Returns a retryer that handles all raised values by @racket[sleep]-ing for an
- amount of milliseconds determined by calling @racket[sleep-amount] with the
- number of previous retries.}
+ amount of milliseconds determined by calling @racket[sleep-amount-proc] with
+ the number of previous retries.}
+
+@defproc[(sleep-retryer/random
+          [max-sleep-amount-proc
+           (-> exact-nonnegative-integer? exact-nonnegative-integer?)])
+          retryer?]{
+ Like @racket[sleep-retryer], but instead of sleeping for an amount of
+ milliseconds equal to what is returned by @racket[max-sleep-amount-proc] a
+ @emph{random} amount of milliseconds @emph{up to} the returned amount is used.}
+
+@defproc[(sleep-const-retryer [sleep-amount exact-nonnegative-integer?])
+         retryer?]{
+ Returns a retryer that handles all raised values by @racket[sleep]-ing for
+ @racket[sleep-amount] milliseconds. Equivalent to
+ @racket[(sleep-retryer (const sleep-amount))].}
+
+@defproc[(sleep-const-retryer/random
+          [max-sleep-amount exact-nonnegative-integer?])
+         retryer?]{
+ Like @racket[sleep-const-retryer] and @racket[sleep-retryer/random]. The
+ returned retryer sleeps for at most @racket[max-sleep-amount] milliseconds.}
+
+@defproc[(sleep-exponential-retryer [sleep-amount exact-nonnegative-integer?]
+                                    [#:exponent-base base (>/c 0) 2])
+         retryer?]{
+ Returns a retryer that handles all raised values by @racket[sleep]-ing for an
+ amount of milliseconds equal to @racket[sleep-amount] multiplied by an
+ exponential factor. The exponential factor is equal to @racket[base] raised to
+ the power of the number of previous retries. With the default exponent base of
+ two, the returned retryer sleeps for @racket[sleep-amount] on the first retry,
+ twice that on the second, four times on the third, eight on the fourth, and so
+ on. Supplying a different exponent base changes the speed of the exponential
+ growth.}
+
+@defproc[(sleep-exponential-retryer/random
+          [max-sleep-amount exact-nonnegative-integer?]
+          [#:exponent-base base (>/c 0) 2])
+         retryer?]{
+ Like @racket[sleep-exponential-retryer] and @racket[sleep-retryer/random]. The
+ returned retryer sleeps for a random amount that is at most the amount the
+ equivalent @racket[sleep-exponential-retryer] would sleep for.}
 
 @section{Higher-Order Retryers}
 
