@@ -6,6 +6,7 @@
                                   racket/contract
                                   racket/function
                                   retry))
+         define-retry-examples-syntax
          retry-examples
          retryer-tech
          source-code-link)
@@ -18,13 +19,20 @@
                     retry)
          scribble/example
          scribble/manual
-         scribble/text)
+         scribble/text
+         syntax/parse/define)
 
 (define (make-retry-eval)
-  (make-base-eval #:lang 'racket/base (list 'require 'retry)))
+  (make-base-eval #:lang 'racket/base (list 'require 'retry 'racket/function)))
 
-(define-syntax-rule (retry-examples example ...)
+(define-simple-macro (retry-examples example:expr ...)
   (examples #:eval (make-retry-eval) example ...))
+
+(define-simple-macro (define-retry-examples-syntax id:id)
+  (begin
+    (define evaluator (make-retry-eval))
+    (define-simple-macro (id example:expr (... ...))
+      (examples #:eval evaluator example (... ...)))))
 
 (define (source-code-link url-str)
   (begin/text "Source code for this library is avaible at " (url url-str)))
