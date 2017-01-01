@@ -8,11 +8,11 @@
   [never-retryer retryer?]
   [limit-retryer (-> exact-nonnegative-integer? retryer?)]
   [print-exn-retryer
-   (-> (-> string? exact-nonnegative-integer? void?) retryer?)]
+   (-> (-> string? exact-nonnegative-integer? string?) retryer?)]
   [sleep-retryer (-> sleep-amount-proc/c retryer?)]
   [sleep-retryer/random (-> sleep-amount-proc/c retryer?)]
-  [sleep-const-retryer (-> exact-nonnegative-integer? retryer?)]
-  [sleep-const-retryer/random (-> exact-nonnegative-integer? retryer?)]
+  [sleep-const-retryer (-> time-period? retryer?)]
+  [sleep-const-retryer/random (-> time-period? retryer?)]
   [sleep-exponential-retryer sleep-exponential-retryer/c]
   [sleep-exponential-retryer/random sleep-exponential-retryer/c]))
 
@@ -31,10 +31,10 @@
 
 
 (define sleep-amount-proc/c
-  (-> exact-nonnegative-integer? exact-nonnegative-integer?))
+  (-> exact-nonnegative-integer? time-period?))
 
 (define sleep-exponential-retryer/c
-  (->* (exact-nonnegative-integer?)
+  (->* (time-period?)
        (#:exponent-base exact-positive-integer?)
        retryer?))
 
