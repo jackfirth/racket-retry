@@ -83,8 +83,8 @@ matter what happens.
 
 @margin-note{In a real world application, retrying forever can be dangerous and
  should be considered carefully. At the very least, unlimited retries should be
- restricted to a very targeted subtype of @racket[exn] rather than any value
- that could be @racket[raise]d.}
+ restricted to a very targeted subtype of @racket[exn] rather than all possible
+ values that could be @racket[raise]d.}
 
 The second, the @racket[#:handle] argument, is called before retrying to perform
 some arbitrary side-effect to handle the thrown exception. Our retryer prints
