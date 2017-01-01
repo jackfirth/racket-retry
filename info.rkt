@@ -5,7 +5,8 @@
 (define deps '("gregor-lib"
                "reprovide-lang"
                "base"))
-(define build-deps '("gregor-doc"
+(define build-deps '("at-exp-lib"
+                     "gregor-doc"
                      "scribble-text-lib"
                      "racket-doc"
                      "scribble-lib"))
