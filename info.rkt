@@ -6,9 +6,12 @@
                "fancy-app"
                "gregor-lib"
                "reprovide-lang"
-               "base"))
+               "base"
+               "mock"))
 (define build-deps '("at-exp-lib"
                      "gregor-doc"
                      "scribble-text-lib"
                      "racket-doc"
-                     "scribble-lib"))
+                     "scribble-lib"
+                     "rackunit-lib"
+                     "mock-rackunit"))
