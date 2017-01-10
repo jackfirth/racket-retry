@@ -6,7 +6,7 @@
                "fancy-app"
                "gregor-lib"
                "reprovide-lang"
-               "base"
+               ("base" #:version "6.5")
                "mock"))
 (define build-deps '("at-exp-lib"
                      "gregor-doc"
