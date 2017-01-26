@@ -95,12 +95,24 @@
 (define (sleep-retryer/random max-sleep-amount)
   (sleep-retryer (random-period .. max-sleep-amount)))
 
-(define (sleep-exponential-retryer sleep-period #:exponent-base [base 2])
+(define/mock (sleep-exponential-retryer sleep-period #:exponent-base [base 2])
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
   (sleep-retryer (*period sleep-period _ .. expt base _)))
+
+(module+ test
+  (test-case "sleep-exponential-retryer"
+    (with-mocks sleep-exponential-retryer
+      (retryer-handle (sleep-exponential-retryer (seconds 10)) 'foo 5)
+      (check-mock-called-with? sleep-mock (arguments 320)))
+    (with-mocks sleep-exponential-retryer
+      (define exp-retryer/base
+        (sleep-exponential-retryer (seconds 10) #:exponent-base 3))
+      (retryer-handle exp-retryer/base 'foo 2)
+      (check-mock-called-with? sleep-mock (arguments 90)))))
 
 (define/mock (sleep-exponential-retryer/random sleep-period #:exponent-base [base 2])
   #:mock-param current-sleep #:as sleep-mock #:with-behavior void
-  #:mock-param current-random #:as random-mock #:with-behavior sub1
+  #:mock-param current-random #:with-behavior sub1
   (sleep-retryer/random (*period sleep-period _ .. expt base _)))
 
 (module+ test
@@ -115,5 +127,23 @@
       (check-mock-calls sleep-mock
                         (list (arguments 1) (arguments 5) (arguments 17))))))
 
-(define sleep-const-retryer (sleep-retryer .. const))
-(define sleep-const-retryer/random (sleep-retryer/random .. const))
+(define/mock sleep-const-retryer
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
+  (sleep-retryer .. const))
+
+(module+ test
+  (test-case "sleep-const-retryer"
+    (with-mocks sleep-const-retryer
+      (retryer-handle (sleep-const-retryer (minutes 5)) 'foo 123)
+      (check-mock-called-with? sleep-mock (arguments 300)))))
+
+(define/mock sleep-const-retryer/random
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
+  #:mock-param current-random #:with-behavior sub1
+  (sleep-retryer/random .. const))
+
+(module+ test
+  (test-case "sleep-const-retryer/random"
+    (with-mocks sleep-const-retryer/random
+      (retryer-handle (sleep-const-retryer/random (minutes 5)) 'foo 123)
+      (check-mock-called-with? sleep-mock (arguments 240)))))
