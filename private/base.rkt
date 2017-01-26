@@ -17,6 +17,11 @@
 (require racket/function
          syntax/parse/define)
 
+(module+ test
+  (require mock
+           mock/rackunit
+           rackunit))
+
 
 (struct retryer (should-retry-proc handle-proc)
   #:omit-define-syntaxes
@@ -44,3 +49,30 @@
 
 (define-simple-macro (with-retry retryer-expr:expr body:expr ...)
   (call/retry retryer-expr (λ () body ...)))
+
+(module+ test
+  (define (foo? v) (equal? v 'foo))
+  (define test-history (call-history))
+  (define should-retry-mock
+    (mock #:name 'should-retry-mock
+          #:behavior (const-series #t #t #f)
+          #:external-histories (list test-history)))
+  (define handle-mock
+    (mock #:name 'handle-mock
+          #:behavior void
+          #:external-histories (list test-history)))
+  (define mock-retryer
+    (retryer #:should-retry? should-retry-mock #:handle handle-mock))
+  (check-exn foo? (thunk (call/retry mock-retryer (const-raise 'foo))))
+  (check-call-history-names
+   test-history
+   (list 'should-retry-mock 'handle-mock
+         'should-retry-mock 'handle-mock
+         'should-retry-mock))
+  (check-mock-calls should-retry-mock
+                    (list (arguments 'foo 0)
+                          (arguments 'foo 1)
+                          (arguments 'foo 2)))
+  (check-mock-calls handle-mock
+                    (list (arguments 'foo 0)
+                          (arguments 'foo 1))))
