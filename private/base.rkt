@@ -63,7 +63,7 @@
           #:external-histories (list test-history)))
   (define mock-retryer
     (retryer #:should-retry? should-retry-mock #:handle handle-mock))
-  (check-exn foo? (thunk (call/retry mock-retryer (const-raise 'foo))))
+  (check-exn foo? (thunk (with-retry mock-retryer (raise 'foo))))
   (check-call-history-names
    test-history
    (list 'should-retry-mock 'handle-mock
