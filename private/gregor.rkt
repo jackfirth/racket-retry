@@ -15,6 +15,9 @@
          gregor/period
          "inject.rkt")
 
+(module+ test
+  (require rackunit))
+
 
 (define epoch (datetime 1970))
 
@@ -43,6 +46,14 @@
      [(milliseconds) 1000]
      [(microseconds) 1000000]
      [(nanoseconds) 1000000000])))
+
+(module+ test
+  (check-equal? (time-period->unit (seconds 5) 'hours) 5/3600)
+  (check-equal? (time-period->unit (seconds 5) 'minutes) 5/60)
+  (check-equal? (time-period->unit (seconds 5) 'seconds) 5)
+  (check-equal? (time-period->unit (seconds 5) 'milliseconds) 5000)
+  (check-equal? (time-period->unit (seconds 5) 'microseconds) 5000000)
+  (check-equal? (time-period->unit (seconds 5) 'nanoseconds) 5000000000))
 
 (define (unit-amount->period unit-amount-pair)
   (unit-period (car unit-amount-pair) (cdr unit-amount-pair)))
