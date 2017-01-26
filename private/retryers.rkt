@@ -125,7 +125,11 @@
       (retryer-handle test-retryer 'foo 1)
       (retryer-handle test-retryer 'foo 2)
       (check-mock-calls sleep-mock
-                        (list (arguments 1) (arguments 5) (arguments 17))))))
+                        (list (arguments 1) (arguments 5) (arguments 17))))
+    (with-mocks sleep-exponential-retryer/random
+      (define test-retryer (sleep-exponential-retryer/random (seconds 10)))
+      (retryer-handle test-retryer 'foo 5)
+      (check-mock-called-with? sleep-mock (arguments 319)))))
 
 (define/mock sleep-const-retryer
   #:mock-param current-sleep #:as sleep-mock #:with-behavior void
