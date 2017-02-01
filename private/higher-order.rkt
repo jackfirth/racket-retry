@@ -65,3 +65,16 @@
     (proc thrown (modulo num-previous-retries cycle-length)))
   (retryer #:should-retry? (wrap/cycle (retryer-should-retry? base _ _))
            #:handle (wrap/cycle (retryer-handle base _ _))))
+
+(module+ test
+  (test-case "cycle-retryer"
+    (define should-retry-mock
+      (mock #:name 'should-retry-mock #:behavior (const #t)))
+    (define handle-mock (mock #:name 'handle-mock #:behavior void))
+    (define retryer-mock
+      (retryer #:should-retry? should-retry-mock #:handle handle-mock))
+    (define cyclic-retryer (cycle-retryer retryer-mock 10))
+    (check-true (retryer-should-retry? cyclic-retryer 'foo 75))
+    (check-mock-called-with? should-retry-mock (arguments 'foo 5))
+    (check-pred void? (retryer-handle cyclic-retryer 'foo 75))
+    (check-mock-called-with? handle-mock (arguments 'foo 5))))
