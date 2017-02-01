@@ -9,7 +9,6 @@
          exp-backoff-tech
          define-retry-examples-syntax
          jitter-tech
-         retry-examples
          retryer-tech
          source-code-link
          thundering-herd-problem)
@@ -35,9 +34,6 @@
                   '(define (secret-new-sleep secs)
                      (printf "Sleeping for ~a seconds...\n" secs))
                   '(current-sleep secret-new-sleep)))
-
-(define-simple-macro (retry-examples example:expr ...)
-  (examples #:eval (make-retry-eval) example ...))
 
 (define-simple-macro (define-retry-examples-syntax id:id)
   (begin
