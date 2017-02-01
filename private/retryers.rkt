@@ -17,7 +17,6 @@
   [sleep-exponential-retryer/random sleep-exponential-retryer/c]))
 
 (require compose-app/fancy-app
-         gregor
          gregor/period
          mock
          racket/function
@@ -77,7 +76,8 @@
        "Received exn-message: test exception and num-previous-retries: 12"))
     (check-mock-called-with? displayln-mock expected-displayln-arguments)))
 
-(define (sleep-retryer sleep-period-proc)
+(define/mock (sleep-retryer sleep-period-proc)
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
   (define (handle/sleep _ num-previous-retries)
     (sleep*
      (time-period->unit (sleep-period-proc num-previous-retries) 'seconds)))
@@ -85,8 +85,7 @@
 
 (module+ test
   (test-case "sleep-retryer"
-    (define sleep-mock (mock #:behavior void))
-    (parameterize ([current-sleep sleep-mock])
+    (with-mocks sleep-retryer
       (define test-sleep-amount minutes)
       (define test-retryer (sleep-retryer test-sleep-amount))
       (check-true (retryer-should-retry? test-retryer 'foo 5))
@@ -96,17 +95,29 @@
 (define (sleep-retryer/random max-sleep-amount)
   (sleep-retryer (random-period .. max-sleep-amount)))
 
-(define (sleep-exponential-retryer sleep-period #:exponent-base [base 2])
+(define/mock (sleep-exponential-retryer sleep-period #:exponent-base [base 2])
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
   (sleep-retryer (*period sleep-period _ .. expt base _)))
 
-(define (sleep-exponential-retryer/random sleep-period #:exponent-base [base 2])
+(module+ test
+  (test-case "sleep-exponential-retryer"
+    (with-mocks sleep-exponential-retryer
+      (retryer-handle (sleep-exponential-retryer (seconds 10)) 'foo 5)
+      (check-mock-called-with? sleep-mock (arguments 320)))
+    (with-mocks sleep-exponential-retryer
+      (define exp-retryer/base
+        (sleep-exponential-retryer (seconds 10) #:exponent-base 3))
+      (retryer-handle exp-retryer/base 'foo 2)
+      (check-mock-called-with? sleep-mock (arguments 90)))))
+
+(define/mock (sleep-exponential-retryer/random sleep-period #:exponent-base [base 2])
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
+  #:mock-param current-random #:with-behavior sub1
   (sleep-retryer/random (*period sleep-period _ .. expt base _)))
 
 (module+ test
   (test-case "sleep-exponential-retryer/random"
-    (define sleep-mock (mock #:behavior void))
-    (define random-mock (mock #:behavior sub1))
-    (parameterize ([current-sleep sleep-mock] [current-random random-mock])
+    (with-mocks sleep-exponential-retryer/random
       (define test-retryer
         (sleep-exponential-retryer/random (seconds 2) #:exponent-base 3))
       (check-true (retryer-should-retry? test-retryer 'foo 12))
@@ -114,7 +125,29 @@
       (retryer-handle test-retryer 'foo 1)
       (retryer-handle test-retryer 'foo 2)
       (check-mock-calls sleep-mock
-                        (list (arguments 1) (arguments 5) (arguments 17))))))
+                        (list (arguments 1) (arguments 5) (arguments 17))))
+    (with-mocks sleep-exponential-retryer/random
+      (define test-retryer (sleep-exponential-retryer/random (seconds 10)))
+      (retryer-handle test-retryer 'foo 5)
+      (check-mock-called-with? sleep-mock (arguments 319)))))
 
-(define sleep-const-retryer (sleep-retryer .. const))
-(define sleep-const-retryer/random (sleep-retryer/random .. const))
+(define/mock sleep-const-retryer
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
+  (sleep-retryer .. const))
+
+(module+ test
+  (test-case "sleep-const-retryer"
+    (with-mocks sleep-const-retryer
+      (retryer-handle (sleep-const-retryer (minutes 5)) 'foo 123)
+      (check-mock-called-with? sleep-mock (arguments 300)))))
+
+(define/mock sleep-const-retryer/random
+  #:mock-param current-sleep #:as sleep-mock #:with-behavior void
+  #:mock-param current-random #:with-behavior sub1
+  (sleep-retryer/random .. const))
+
+(module+ test
+  (test-case "sleep-const-retryer/random"
+    (with-mocks sleep-const-retryer/random
+      (retryer-handle (sleep-const-retryer/random (minutes 5)) 'foo 123)
+      (check-mock-called-with? sleep-mock (arguments 240)))))

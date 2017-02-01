@@ -7,7 +7,7 @@
                "gregor-lib"
                "reprovide-lang"
                ("base" #:version "6.5")
-               "mock"))
+               ("mock" #:version "2.1")))
 (define build-deps '("at-exp-lib"
                      "gregor-doc"
                      "scribble-text-lib"
