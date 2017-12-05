@@ -265,7 +265,7 @@ appears to "reset".
 Putting together all the concepts we've learned so far, let's consider how a web
 server might reliable handle the failure of a database it retrieves information
 from. It would be most unfortunate if a small temporary network issue caused our
-website to permanently fail. There's a host of other contraints as well:
+website to permanently fail. There's a host of other constraints as well:
 
 @itemlist[
  @item{A small hiccup may be resolved in seconds, we shouldn't be waiting for
